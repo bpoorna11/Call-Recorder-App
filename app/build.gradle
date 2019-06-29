@@ -1,0 +1,79 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 27
+    buildToolsVersion '28.0.3'
+
+    defaultConfig {
+        applicationId "com.github.axet.callrecorder"
+        minSdkVersion 17
+        targetSdkVersion 27
+        versionCode 199
+        versionName "1.6.44"
+        multiDexEnabled true
+    }
+    signingConfigs {
+        release {
+            storeFile file(prop('RELEASE_STORE_FILE') ?: 'none')
+            storePassword prop('RELEASE_STORE_PASSWORD')
+            keyAlias prop('RELEASE_KEY_ALIAS')
+            keyPassword prop('RELEASE_KEY_PASSWORD')
+        }
+    }
+    buildTypes {
+        debug {
+            debuggable true
+            jniDebuggable true
+            minifyEnabled false
+        }
+        release {
+            shrinkResources true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            output.outputFileName = org.apache.commons.io.FilenameUtils.getExtension(android.defaultConfig.applicationId) + "-" + (output.getFilter(com.android.build.OutputFile.ABI) ?: "universal") + "-" + android.defaultConfig.versionName + "-" + variant.buildType.name + ".apk"
+        }
+    }
+    bundle {
+        abi {
+            enableSplit = true
+        }
+    }
+    splits {
+        abi {
+            enable false
+            universalApk true
+        }
+    }
+}
+
+def surveys = project.file('src/main/res/raw/surveys.csv')
+
+task fetch() {
+    def url = 'https://docs.google.com/spreadsheets/d/1C6HuLIk3k4SmAYEuKOnQynGEPM39rjlu90oX7bYbqLk/gviz/tq?gid=1685986704&tqx=out:csv'
+    if (!surveys.exists())
+        new URL(url).withInputStream { i -> surveys.withOutputStream { it << i } }
+}
+
+clean.doLast {
+    surveys.delete()
+}
+
+preBuild.dependsOn fetch
+
+dependencies {
+
+    implementation 'com.github.axet:android-audio-library:1.0.149' // implementation project(':android-audio-library')
+    implementation "org.apache.commons:commons-csv:1.5"
+    implementation 'com.google.firebase:firebase-auth:11.6.0'
+    implementation 'com.google.android.gms:play-services-auth:11.6.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.0.0-RC1'
+    implementation 'com.android.support:multidex:1.0.3'
+    testImplementation 'junit:junit:4.12'
+}
+apply plugin: 'com.google.gms.google-services'
+

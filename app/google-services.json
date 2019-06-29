@@ -1,0 +1,122 @@
+{
+  "project_info": {
+    "project_number": "87479368159",
+    "firebase_url": "https://chatapplication-ebd62.firebaseio.com",
+    "project_id": "chatapplication-ebd62",
+    "storage_bucket": "chatapplication-ebd62.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:87479368159:android:09411c7d4273e4e4",
+        "android_client_info": {
+          "package_name": "com.balakrishnan.poorna.call_record"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "87479368159-s78jjcjtten8sug1end944arb8fpbldd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.balakrishnan.poorna.call_record",
+            "certificate_hash": "48a0acc1c2855470370e104924ff8a0514e23fbc"
+          }
+        },
+        {
+          "client_id": "87479368159-8m7nqsuuoa323qlm6trbpm9ni0g4fnlt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbnmY9tLx0lic0qg6RlEszs_AjM_bB2z8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "87479368159-8m7nqsuuoa323qlm6trbpm9ni0g4fnlt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:87479368159:android:16f851547b425e2b",
+        "android_client_info": {
+          "package_name": "com.balakrishnan.poorna.chatapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "87479368159-r8vsr37bra6hd1ipclkebsolerqaa36c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.balakrishnan.poorna.chatapplication",
+            "certificate_hash": "48a0acc1c2855470370e104924ff8a0514e23fbc"
+          }
+        },
+        {
+          "client_id": "87479368159-8m7nqsuuoa323qlm6trbpm9ni0g4fnlt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbnmY9tLx0lic0qg6RlEszs_AjM_bB2z8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "87479368159-8m7nqsuuoa323qlm6trbpm9ni0g4fnlt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:87479368159:android:6660fa9d216d801d",
+        "android_client_info": {
+          "package_name": "com.github.axet.callrecorder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "87479368159-gtmg44tdajdmt7slke13n4he6g05ggds.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.github.axet.callrecorder",
+            "certificate_hash": "48a0acc1c2855470370e104924ff8a0514e23fbc"
+          }
+        },
+        {
+          "client_id": "87479368159-8m7nqsuuoa323qlm6trbpm9ni0g4fnlt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbnmY9tLx0lic0qg6RlEszs_AjM_bB2z8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "87479368159-8m7nqsuuoa323qlm6trbpm9ni0g4fnlt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
