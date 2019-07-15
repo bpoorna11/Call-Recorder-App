@@ -33,15 +33,22 @@ public class UploadService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        System.out.println("Upload service called " +RecordingService.filename);
-        final String file_path =RecordingService.filename ;
+
+        String filename = RecordingService.filename;
+        System.out.println("Upload service called " + filename);
+        File folder = new File("/storage/emulated/0/Call Recorder");
+        File[] listOfFiles = folder.listFiles();
+        for (int i = 0; i < listOfFiles.length; i++) {
+            System.out.println("/storage/emulated/0/Call Recorder/"+listOfFiles[i].getName());
+        final String file_path = "/storage/emulated/0/Call Recorder/"+listOfFiles[i].getName();//filename;
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
 
                 File f = new File(file_path);
-                String content_type = getMimeType(f.getPath());
+                String content_type = "audio/x-wav";//getMimeType(f.getPath());
                 System.out.println("Content type " + content_type);
+
                 String file_path = f.getAbsolutePath();
                 OkHttpClient client = new OkHttpClient.Builder()
                         .connectTimeout(60, TimeUnit.SECONDS)
@@ -77,6 +84,7 @@ public class UploadService extends Service {
         });
 
         t.start();
+    }
         stopSelf();
         return START_STICKY;
 

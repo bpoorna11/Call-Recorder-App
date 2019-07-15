@@ -51,16 +51,8 @@ public class LoginActivity extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
 
-        SharedPreferences sp1 = getSharedPreferences("sdata", LoginActivity.MODE_PRIVATE);
-        if (sp1.getString("login", "no").equals("yes")) {
-            //login value is yes, so start mainactivity
-            //  personEmail=mAuth.getCurrentUser().getEmail().toString();
-            Intent in = new Intent(getApplicationContext(), MainActivity.class);
-            startActivity(in);
-            //finish();
-        } else {
-            //login value is no, so start loginactivity
 
+            //login value is no, so start loginactivity
             signIn = (SignInButton) findViewById(R.id.sign_in_button);
           //  so = (Button) findViewById(R.id.signout);
             mAuth = FirebaseAuth.getInstance();
@@ -87,7 +79,7 @@ public class LoginActivity extends AppCompatActivity  {
                     so.setVisibility(View.GONE);
                 }
             });*/
-        }
+
     }
     private void signIn() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
@@ -155,38 +147,21 @@ public class LoginActivity extends AppCompatActivity  {
         edd.commit();
 
         Intent in = new Intent(getApplicationContext(), MainActivity.class);
+        in.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         in.putExtra("senddata",personEmail);
         startActivity(in);
-
+        finish();
     }
     @Override
     protected void onResume() {
         super.onResume();
-
+        System.out.println("ON resume called in login");
+        //finish();
         // Runtime permission
-        try {
-            boolean permissionGranted_ReadCon = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED;
-            if (permissionGranted_ReadCon) {
 
-                try {
-                    // toggleButton.setVisibility(View.VISIBLE);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, 700);
-            }
-
-        } catch (
-                Exception e)
-
-        {
-            e.printStackTrace();
-        }
 
     }
-    @Override
+  /*  @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == 700) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -202,5 +177,5 @@ public class LoginActivity extends AppCompatActivity  {
                 }
             }
         }
-    }
+    }*/
 }

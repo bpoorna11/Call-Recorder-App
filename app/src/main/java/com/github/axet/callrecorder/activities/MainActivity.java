@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.view.menu.MenuBuilder;
@@ -204,59 +205,62 @@ public class MainActivity extends AppCompatThemeActivity implements SharedPrefer
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
-
         if (OptimizationPreferenceCompat.needKillWarning(this, CallApplication.PREFERENCE_NEXT))
-            OptimizationPreferenceCompat.buildKilledWarning(this, true, CallApplication.PREFERENCE_OPTIMIZATION).show();
+                OptimizationPreferenceCompat.buildKilledWarning(this, true, CallApplication.PREFERENCE_OPTIMIZATION).show();
 
-        list = (ListView) findViewById(R.id.list);
-        View empty = findViewById(R.id.empty_list);
-        list.setEmptyView(empty);
+            list = (ListView) findViewById(R.id.list);
+            View empty = findViewById(R.id.empty_list);
+            list.setEmptyView(empty);
 
-        storage = new Storage(this);
+            storage = new Storage(this);
 
-        IntentFilter ff = new IntentFilter();
-        ff.addAction(SHOW_PROGRESS);
-        ff.addAction(SET_PROGRESS);
-        ff.addAction(SHOW_LAST);
-        registerReceiver(receiver, ff);
+            IntentFilter ff = new IntentFilter();
+            ff.addAction(SHOW_PROGRESS);
+            ff.addAction(SET_PROGRESS);
+            ff.addAction(SHOW_LAST);
+            registerReceiver(receiver, ff);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
 
-        fab_panel = findViewById(R.id.fab_panel);
-        status = (TextView) fab_panel.findViewById(R.id.status);
+            fab_panel = findViewById(R.id.fab_panel);
+            status = (TextView) fab_panel.findViewById(R.id.status);
 
-        fab_stop = (FloatingActionButton) findViewById(R.id.fab_stop);
-        fab_stop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                RecordingService.stopButton(MainActivity.this);
-            }
-        });
+            fab_stop = (FloatingActionButton) findViewById(R.id.fab_stop);
+            fab_stop.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    RecordingService.stopButton(MainActivity.this);
+                }
+            });
 
-        fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                RecordingService.stopButton(MainActivity.this);
+            fab = (FloatingActionButton) findViewById(R.id.fab);
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    RecordingService.stopButton(MainActivity.this);
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
+                }
+            });
+
+            updatePanel();
+
+            recordings = new Recordings(this, list);
+            list.setAdapter(recordings);
+            recordings.setToolbar((ViewGroup) findViewById(R.id.recording_toolbar));
+
+            RecordingService.startIfEnabled(this);
+            boolean b = RecordingService.isEnabled(this);
+            if (Storage.permitted(MainActivity.this, PERMISSIONS, RESULT_CALL)) {
+                System.out.println("Permitted...");
+                RecordingService.setEnabled(this, true);
             }
-        });
-
-        updatePanel();
-
-        recordings = new Recordings(this, list);
-        list.setAdapter(recordings);
-        recordings.setToolbar((ViewGroup) findViewById(R.id.recording_toolbar));
-
-        RecordingService.startIfEnabled(this);
-        boolean b = RecordingService.isEnabled(this);
-       if(Storage.permitted(MainActivity.this, PERMISSIONS, RESULT_CALL))
-        RecordingService.setEnabled(this, true);
-       else RecordingService.setEnabled(this, false);
+            else {
+                System.out.println("Not Permitted...");
+                RecordingService.setEnabled(this, false);
+            }
         /*final SharedPreferences shared = PreferenceManager.getDefaultSharedPreferences(this);
         if (shared.getBoolean("warning", true)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -337,8 +341,9 @@ public class MainActivity extends AppCompatThemeActivity implements SharedPrefer
             d.show();
         }*/
 
-        Intent intent = getIntent();
-        openIntent(intent);
+            Intent intent = getIntent();
+            openIntent(intent);
+
     }
 
     @Override
@@ -583,6 +588,7 @@ public class MainActivity extends AppCompatThemeActivity implements SharedPrefer
                 recordings.progressEmpty.setVisibility(View.GONE);
             }
         };
+
         recordings.progressText.setVisibility(View.GONE);
         recordings.progressEmpty.setVisibility(View.VISIBLE);
 
@@ -646,6 +652,7 @@ public class MainActivity extends AppCompatThemeActivity implements SharedPrefer
                         ErrorDialog.Error(this, e);
                     }
                     recordings.load(false, null);
+                    RecordingService.setEnabled(this, true);
                     if (resumeCall != null) {
                         RecordingService.setEnabled(this, resumeCall.isChecked());
                         resumeCall = null;

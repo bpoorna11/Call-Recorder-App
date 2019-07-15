@@ -11,8 +11,9 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT" />
+  <!--  <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT" />-->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 
     <application
         android:name=".app.CallApplication"
@@ -68,16 +69,22 @@
                 android:resource="@xml/searchable" />
 
         </activity>
+        <activity android:name=".activities.LauncherActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:theme="@android:style/Theme.NoDisplay">
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        </activity>
+
         <activity
             android:name=".activities.LoginActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="Call Recorder"
             android:theme="@style/RecThemeLight.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".activities.RecentCallActivity"

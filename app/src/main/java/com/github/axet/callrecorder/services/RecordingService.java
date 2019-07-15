@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -56,6 +57,8 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -71,7 +74,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class RecordingService extends Service implements SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String TAG = RecordingService.class.getSimpleName();
-
+    private AudioManager audioManager;
     public static final int NOTIFICATION_RECORDING_ICON = 1;
     public static final int NOTIFICATION_PERSISTENT_ICON = 2;
     public static final int RETRY_DELAY = 60 * 1000; // 1 min
@@ -228,6 +231,7 @@ public class RecordingService extends Service implements SharedPreferences.OnSha
     }
 
     class PhoneStateChangeListener extends PhoneStateListener {
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         public boolean wasRinging;
         public boolean startedByCall;
         TelephonyManager tm;
@@ -249,21 +253,45 @@ public class RecordingService extends Service implements SharedPreferences.OnSha
                         System.out.println("CALL STATE OFFHOOK");
                         setPhone(incomingNumber, call);
                         if (thread == null) { // handling restart while current call
+                            Thread t = new Thread() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        while(true) {
+                                            sleep(1000);
+                                            audioManager.setMode(AudioManager.MODE_IN_CALL);
+                                            if (!audioManager.isSpeakerphoneOn())
+                                                audioManager.setSpeakerphoneOn(true);
+                                            audioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL,4, 0);
+                                        }
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                    audioManager.setMode(AudioManager.MODE_IN_CALL);
+                                    System.out.println("Max volume "+audioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL));
+                                    audioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL,4, 0);
+                                }
+                            };
+
+                            t.start();
+                            System.out.println("Max volume "+audioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL));
                             System.out.println("begin method called ");
                             begin(wasRinging);
                             startedByCall = true;
                         }
                         break;
                     case TelephonyManager.CALL_STATE_IDLE:
+                        audioManager.setSpeakerphoneOn(false);
                         if (startedByCall) {
                             if (tm.getCallState() != TelephonyManager.CALL_STATE_OFFHOOK) { // current state maybe differed from queued (s) one
                                 System.out.println("Inside CALL_STATE_IDLE: finish() called");
                                 finish();
                                 System.out.println("Inside CALL_STATE_IDLE: targeturi "+targetUri);
                                 filename=targetUri.toString().substring(7);
+                                filename= URLDecoder.decode(filename, "UTF-8");
                                 System.out.println("Name of file "+filename);
-                                Intent intent = new Intent(RecordingService.this, UploadService.class);
-                                startService(intent);
+                                //Intent intent = new Intent(RecordingService.this, UploadService.class);
+                               // startService(intent);
                             } else {
                                 return; // fast clicking. new call already stared. keep recording. do not reset startedByCall
                             }
@@ -284,6 +312,8 @@ public class RecordingService extends Service implements SharedPreferences.OnSha
                 }
             } catch (RuntimeException e) {
                 Error(e);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -327,7 +357,7 @@ public class RecordingService extends Service implements SharedPreferences.OnSha
         super.onCreate();
         Log.d(TAG, "onCreate");
 
-        optimization = new OptimizationPreferenceCompat.ServiceReceiver(this, getClass(), CallApplication.PREFERENCE_OPTIMIZATION) {
+        optimization = new OptimizationPreferenceCompat.ServiceReceiver(this, RecordingService.class, CallApplication.PREFERENCE_OPTIMIZATION) {
             @Override
             public void register() {
                 super.register();
@@ -442,7 +472,7 @@ public class RecordingService extends Service implements SharedPreferences.OnSha
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand");
-
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         if (optimization.onStartCommand(intent, flags, startId)) {
             // nothing to restart
         }
@@ -549,7 +579,7 @@ public class RecordingService extends Service implements SharedPreferences.OnSha
 
         title = encoding != null ? getString(R.string.encoding_title) : (getString(R.string.recording_title) + " " + getSourceText());
         text = ".../" + Storage.getName(this, targetUri);
-        System.out.println("build notification method"+text);
+        System.out.println("build notification method  "+text);
         builder.setViewVisibility(R.id.notification_pause, View.VISIBLE);
         builder.setImageViewResource(R.id.notification_pause, recording ? R.drawable.ic_stop_black_24dp : R.drawable.ic_play_arrow_black_24dp);
 
@@ -709,7 +739,22 @@ public class RecordingService extends Service implements SharedPreferences.OnSha
         thread = new Thread("RecordingThread") {
             @Override
             public void run() {
-                if (old != null) {
+                 /* try {
+                      while(true) {
+                                    sleep(1000);
+                                    audioManager.setMode(AudioManager.MODE_IN_CALL);
+                                    //System.out.println("Inside recording thread : audiomanager");
+                                    if (!audioManager.isSpeakerphoneOn()) {
+                                        //System.out.println("Inside recording thread : turn on speaker");
+                                        audioManager.setSpeakerphoneOn(true);
+                                    }
+                                }
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                 audioManager.setMode(AudioManager.MODE_IN_CALL);
+                audioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL,audioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL), 0);
+               */ if (old != null) {
                     oldb.set(true);
                     old.interrupt();
                     try {
@@ -1089,6 +1134,7 @@ public class RecordingService extends Service implements SharedPreferences.OnSha
     void begin(boolean wasRinging) {
         now = System.currentTimeMillis();
         targetUri = storage.getNewFile(now, phone, contact, call);
+        System.out.println("Inside begin method "+targetUri);
         if (encoder != null) {
             encoder.pause();
         }
@@ -1151,8 +1197,10 @@ public class RecordingService extends Service implements SharedPreferences.OnSha
             c.call = "";
             c.now = inFile.lastModified();
             c.targetUri = storage.getNewFile(c.now, c.phone, c.contact, c.call);
+            System.out.println("Inside encodingNext method "+c.targetUri);
         }
         targetUri = c.targetUri; // update notification encoding name
+        System.out.println("Inside encodingNext method 2 "+targetUri);
         final String contactId = c.contactId;
         final String call = c.call;
         final Uri targetUri = RecordingService.this.targetUri;
